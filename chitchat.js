@@ -200,14 +200,14 @@ function DynamicUsers() {
 function DynamicChatD(usern) {
     let userid = UserSearch(usern);
     arr = [];
-    // arr = messagejson.map(mes =>
-    // (mes.fk_id_d == userid && mes.fk_id_m == ThisUser()) ? mes.message :
-    // (mes.fk_id_m == userid && mes.fk_id_d == ThisUser()) ? mes.message : null);
+    arr = messagejson.map(mes =>
+        (mes.fk_id_d == userid && mes.fk_id_m == ThisUser() || mes.fk_id_m == userid && mes.fk_id_d == ThisUser()) ? mes.message :
+        null);
     arr.unshift('Cancel operation');;
     return arr;
 }
 async function DeleteMessages() {
-    let
+    let fk_id_d,
         melete;
     await inquirer
         .prompt([{
@@ -224,15 +224,16 @@ async function DeleteMessages() {
                 type: 'list',
                 name: 'm',
                 message: 'Select the message you want to delete:',
-                choises: DynamicChatD(answers.d)
+                choices: DynamicChatD(fk_id_d)
             }])
             .then(answers => {
-                if (answers.d != "Cancel operation") {
-                    melete = DynamicChatD(answers.d).find(mes => mes.message == answers.m).id;
+                if (answers.m != "Cancel operation") {
+                    melete = DynamicChatD(fk_id_d).find(mes => mes.message == answers.m);
                     messagejson.splice(melete, 1);
                     let cont = JSON.stringify(messagejson);
                     fs.writeFileSync("message.json", cont);
                 }
             });
-        Menu();
     }
+    Menu();
+}
